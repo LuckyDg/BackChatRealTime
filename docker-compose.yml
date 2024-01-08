@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  kafka-api:
+    build:
+      context: ./kafka_nodejs
+    ports:
+      - "8000:8000"
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      - db
+    environment:
+      PGHOST: db
+      PGUSER: postgres
+      PGPASSWORD: admin
+      PGDATABASE: dbTestKafka
+      PGPORT: 5432
+    ports:
+      - "7788:7788"
+
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: dbTestKafka
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./backend/initdb:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
